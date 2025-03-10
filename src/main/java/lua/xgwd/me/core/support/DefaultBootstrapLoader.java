@@ -4,13 +4,14 @@ import lua.xgwd.me.core.BootStrapLuaScriptLoader;
 import lua.xgwd.me.core.ClassScanner;
 import lua.xgwd.me.core.annotation.LuaMapper;
 import lua.xgwd.me.core.annotation.LuaScript;
+import lua.xgwd.me.core.event.RegisterEvent;
 import lua.xgwd.me.core.proxy.LuaMapperInvocationHandler;
-import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.util.FilterBuilder;
-
-import java.lang.annotation.Annotation;
+import org.springframework.beans.BeansException;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -22,8 +23,11 @@ import java.util.Set;
  * @date 2025/03/10 17:45
  * 默认解析器 解析xxx.lua
  **/
-public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader {
+@Component
+public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
+        ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
 
+    ApplicationContext applicationContext;
 
     ClassScanner classScanner;
 
@@ -36,8 +40,7 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader {
     // 保存扫描到的代理对象，键为接口的 Class
     private Map<Class<?>, Object> mapperProxies = new HashMap<>();
 
-    public DefaultBootstrapLoader(String basePackage, ClassScanner classScanner) {
-        this.basePackage = basePackage;
+    public DefaultBootstrapLoader(ClassScanner classScanner) {
         this.classScanner = classScanner;
     }
 
@@ -58,8 +61,8 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader {
                     LuaScript annotation = method.getAnnotation(LuaScript.class);
                     String scriptId = annotation.value();
                     System.out.println(scriptId);
+                    applicationContext.publishEvent(new RegisterEvent(scriptId));
                     methodScriptMapping.put(method, scriptId);
-                    // TODO 广播RegisterEvent事件 进行注册
                 }
             }
 
@@ -75,7 +78,7 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader {
         }
     }
 
-//    /**
+    //    /**
 //     * 获取某个LuaMapper接口的代理实例
 //     *
 //     * @param mapperInterface 接口类型
@@ -84,5 +87,20 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader {
 //     */
     public <T> T getMapper(Class<T> mapperInterface) {
         return (T) mapperProxies.get(mapperInterface);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
+
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        String name = applicationReadyEvent.getSpringApplication().getMainApplicationClass().getPackage().getName();
+        System.out.println(name);
+        basePackage = name;
+        System.out.println(basePackage);
+        load();
     }
 }

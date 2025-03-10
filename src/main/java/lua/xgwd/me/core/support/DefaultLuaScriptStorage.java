@@ -7,6 +7,7 @@ package lua.xgwd.me.core.support;
  **/
 import lua.xgwd.me.core.LuaScriptStorage;
 import lua.xgwd.me.core.bean.LuaScriptEntity;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 默认的Lua脚本存储实现，基于ConcurrentHashMap实现线程安全的存储管理
  */
+@Component
 public class DefaultLuaScriptStorage implements LuaScriptStorage {
 
 

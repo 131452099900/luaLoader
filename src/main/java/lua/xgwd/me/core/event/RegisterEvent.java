@@ -1,5 +1,6 @@
 package lua.xgwd.me.core.event;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lua.xgwd.me.core.bean.LuaScriptEntity;
 import org.springframework.context.ApplicationEvent;
@@ -15,5 +16,6 @@ public class RegisterEvent extends ApplicationEvent {
 
     public RegisterEvent(Object source) {
         super(source);
+        id = (String) source;
     }
 }

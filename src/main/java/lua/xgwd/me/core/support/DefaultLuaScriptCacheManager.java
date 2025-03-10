@@ -33,7 +33,7 @@ public class DefaultLuaScriptCacheManager implements LuaScriptCacheManager {
     }
 
     public DefaultLuaScriptCacheManager(LuaScriptStorage storage, int capacity) {
-        this.capacity  = capacity;
+        this.capacity = capacity;
         this.storage = storage;
         lruCache = new LRUCache(capacity, storage);
     }
