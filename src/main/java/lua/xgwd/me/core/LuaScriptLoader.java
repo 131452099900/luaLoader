@@ -8,5 +8,10 @@ import lua.xgwd.me.core.annotation.LuaScript;
  * lua脚本加载器
  */
 interface LuaScriptLoader {
+    /**
+     * 加载lua脚本
+     * @param scriptId Lua脚本Id
+     * @return lua脚本
+     */
     LuaScript loadScript(String scriptId);
 }
