@@ -12,4 +12,8 @@ import org.springframework.context.ApplicationEvent;
 public class RegisterEvent extends ApplicationEvent {
     private String id;
     private LuaScriptEntity luaScriptEntity;
+
+    public RegisterEvent(Object source) {
+        super(source);
+    }
 }

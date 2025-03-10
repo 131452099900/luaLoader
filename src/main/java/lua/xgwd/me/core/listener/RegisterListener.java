@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
  * @author gbl.huang
  * @date 2025/03/10 17:38
  **/
-@Component
-public class RegisterListener implements ApplicationListener<RegisterEvent> {
-
-    @Autowired
-    private LuaScriptRegistry luaScriptRegistry;
-    @Override
-    public void onApplicationEvent(RegisterEvent registerEvent) {
-        luaScriptRegistry.register(registerEvent.getLuaScriptEntity());
-    }
-}
+//@Component
+//public class RegisterListener implements ApplicationListener<RegisterEvent> {
+//
+//    @Autowired
+//    private LuaScriptRegistry luaScriptRegistry;
+//    @Override
+//    public void onApplicationEvent(RegisterEvent registerEvent) {
+//        luaScriptRegistry.register(registerEvent.getLuaScriptEntity());
+//    }
+//}
