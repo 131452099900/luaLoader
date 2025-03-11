@@ -1,8 +1,8 @@
 
-## 简介
+# 简介
 本组件是一个基于Spring Boot的Lua脚本执行和管理工具，支持动态加载、执行和管理Lua脚本。通过注解和接口代理的方式，开发者可以轻松调用Lua脚本，并支持内存化管理（LRU缓存）、动态装配Lua脚本等功能。
 
-## 功能特性
+# 功能特性
 1.自动装配Lua脚本代理对象：基于接口注解调用Lua脚本。
 
 2.内存化管理：支持LRU缓存机制，提升脚本执行效率。
@@ -14,13 +14,13 @@
 5.集群管理：支持多节点集群环境下的Lua脚本管理（待实现）。
 
 
-## 组件
+# 组件
 ![image](https://github.com/user-attachments/assets/17516334-e121-40bd-9486-a93f90db8368)
 
-## 实现原理
+# 实现原理
 ![Uploading image.png…](![image](https://github.com/user-attachments/assets/05177cbd-7769-4cb2-a321-073ac69312b5)
 
-## 基本使用
+# 基本使用
 注意springboot的装配版本，如有冲突可自行拉取代码修改
 ```
 <dependency>
