@@ -5,6 +5,7 @@ package lua.xgwd.me.core.support;
  * @date 2025/03/10 16:19
  * 默认存储器 基于ConcurrentHashMap进行存储
  **/
+import lombok.NoArgsConstructor;
 import lua.xgwd.me.core.LuaScriptStorage;
 import lua.xgwd.me.core.bean.LuaScriptEntity;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 默认的Lua脚本存储实现，基于ConcurrentHashMap实现线程安全的存储管理
  */
-@Component
+@NoArgsConstructor
 public class DefaultLuaScriptStorage implements LuaScriptStorage {
 
 

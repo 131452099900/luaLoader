@@ -13,7 +13,6 @@ import java.lang.reflect.Type;
  * @author gbl.huang
  * @date 2025/03/11 09:47
  **/
-@Component
 public class DefaultParamParser implements LuaParameterParser {
     @Override
     public LuaScriptParams resolve(Method method, Object[] params) {

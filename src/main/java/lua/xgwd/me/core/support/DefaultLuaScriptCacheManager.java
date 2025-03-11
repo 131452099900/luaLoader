@@ -5,8 +5,6 @@ import lua.xgwd.me.core.LuaScriptCacheManager;
 import lua.xgwd.me.core.LuaScriptStorage;
 import lua.xgwd.me.core.bean.LuaScriptEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -15,33 +13,20 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2025/03/10 16:31
  * 默认使用Lua进行实现
  **/
-@Data
-@Component
 public class DefaultLuaScriptCacheManager implements LuaScriptCacheManager {
 
-//    @Autowired
-    private LuaScriptStorage luaScriptStorage;
-
-    @Autowired
-    public void setLuaScriptStorage(LuaScriptStorage luaScriptStorage) {
-       this.luaScriptStorage = luaScriptStorage;
-        lruCache.storage = luaScriptStorage;
-    }
     private final int capacity;
-
+    LuaScriptStorage luaScriptStorage;
     LRUCache lruCache;
 
-    public DefaultLuaScriptCacheManager() {
+    @Autowired
+    public DefaultLuaScriptCacheManager(LuaScriptStorage luaScriptStorage) {
         capacity = 256;
         lruCache = new LRUCache(capacity, luaScriptStorage);
-    }
+        this.luaScriptStorage = luaScriptStorage;
+        lruCache.storage = luaScriptStorage;
 
-    public DefaultLuaScriptCacheManager(LuaScriptStorage storage, int capacity) {
-        this.capacity = capacity;
-        this.luaScriptStorage = storage;
-        lruCache = new LRUCache(capacity, storage);
     }
-
 
     @Override
     public void addScript(LuaScriptEntity luaScriptEntity) {

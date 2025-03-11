@@ -11,25 +11,21 @@ import org.springframework.stereotype.Component;
  * @author gbl.huang
  * @date 2025/03/10 17:27
  **/
-@Component
 @Slf4j
 public class DefaultLuaScriptRegister implements LuaScriptRegistry {
 
-    @Autowired
     LuaScriptCacheManager cacheManager;
 
-    public DefaultLuaScriptRegister() {
 
-    }
-
-    public DefaultLuaScriptRegister(LuaScriptCacheManager cacheManager) {
-        this.cacheManager = cacheManager;
+    @Autowired
+    public DefaultLuaScriptRegister(LuaScriptCacheManager luaScriptCacheManager) {
+        this.cacheManager = luaScriptCacheManager;
     }
 
     @Override
     public void register(LuaScriptEntity luaScriptEntity) {
         // TODO 拓展化前置接口
-        log.info("注册 {}", luaScriptEntity);
+        log.info("注册lua脚本-------------》 {} 《-------------", luaScriptEntity.getId());
         cacheManager.addScript(luaScriptEntity);
         // TODO 拓展化后置接口
 

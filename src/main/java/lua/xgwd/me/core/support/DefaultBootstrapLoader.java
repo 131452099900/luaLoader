@@ -7,19 +7,12 @@ import lua.xgwd.me.core.bean.LuaScriptEntity;
 import lua.xgwd.me.core.event.RegisterEvent;
 import lua.xgwd.me.core.proxy.LuaMapperInvocationHandler;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -31,44 +24,34 @@ import java.util.Set;
  * @date 2025/03/10 17:45
  * 默认解析器 解析xxx.lua
  **/
-@Component
 public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
         ApplicationContextAware, ApplicationListener<ApplicationReadyEvent> {
+    private String basePackage;
 
     ApplicationContext applicationContext;
-
     ClassScanner classScanner;
+    LuaScriptLoader luaScriptLoader;
+    LuaMapperFactory factory;
+    LuaScriptExecutor executor;
+
 
     @Autowired
-    LuaScriptLoader luaScriptLoader;
+    public DefaultBootstrapLoader(ClassScanner classScanner, LuaScriptLoader luaScriptLoader
+            ,LuaMapperFactory luaMapperFactory, LuaScriptExecutor luaScriptExecutor) {
+        this.classScanner = classScanner;
+        this.luaScriptLoader = luaScriptLoader;
+        this.factory = luaMapperFactory;
+        this.executor = luaScriptExecutor;
+    }
+
 
     @Override
     public void bootstrapScanLuaScript(String packageName) {
-
-    }
-
-    private String basePackage;
-
-    @Autowired
-    private LuaMapperFactory factory;
-
-    @Autowired
-    private LuaScriptExecutor executor;
-
-    public DefaultBootstrapLoader(ClassScanner classScanner) {
-        this.classScanner = classScanner;
-    }
-
-    /**
-     * 启动加载过程
-     */
-    public void load() {
         // 1. 扫描basePackage下所有带有@LuaMapper注解的接口
         Set<Class<?>> mapperInterfaces = classScanner.scanForAnnotation(basePackage, LuaMapper.class);
 
         // 2. 遍历每个接口，解析方法注解并生成代理对象
         for (Class<?> mapperInterface : mapperInterfaces) {
-            System.out.println(mapperInterface.getName());
             // 解析该接口中每个方法上@LuaScript注解的脚本ID映射
             Map<Method, String> methodScriptMapping = new HashMap<>();
             for (Method method : mapperInterface.getDeclaredMethods()) {
@@ -98,28 +81,24 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
         }
     }
 
+
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+//        applicationContext.getBean();
     }
 
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        String name = applicationReadyEvent.getSpringApplication().getMainApplicationClass().getPackage().getName();
-        System.out.println(name);
-        basePackage = name;
-        System.out.println(basePackage);
-        load();
+        basePackage = applicationReadyEvent.getSpringApplication().getMainApplicationClass().getPackage().getName();
+        bootstrapScanLuaScript(basePackage);
     }
 
     private void injectContext(Object obj) {
-        Class<?> aClass = obj.getClass();
-        DefaultListableBeanFactory beanFactory =(DefaultListableBeanFactory ) applicationContext.getAutowireCapableBeanFactory();
-        // 获取 BeanFactory
-        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
-        System.out.println(obj.getClass().getName() + " hahahah   ");
-        System.out.println(obj.getClass().getGenericInterfaces()[0].getTypeName());
+        DefaultListableBeanFactory beanFactory =
+                (DefaultListableBeanFactory ) applicationContext.getAutowireCapableBeanFactory();
         // 代理的父类是接口
         beanFactory.registerSingleton(obj.getClass().getName(), obj);
 
