@@ -7,7 +7,7 @@ import lua.xgwd.me.core.bean.LuaScriptParams;
  * @date 2025/03/10 11:25
  * Lua脚本执行器接口
  */
-interface LuaScriptExecutor {
+public interface LuaScriptExecutor {
     /**
      * 看看这里返回什么结果好，一般redis执行lua脚本的话其实就3种
      * Long boolean int ListMap

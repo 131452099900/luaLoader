@@ -18,4 +18,10 @@ public class RegisterEvent extends ApplicationEvent {
         super(source);
         id = (String) source;
     }
+
+    public RegisterEvent(String id, LuaScriptEntity luaScriptEntity) {
+        super(id);
+        this.id = id;
+        this.luaScriptEntity = luaScriptEntity;
+    }
 }

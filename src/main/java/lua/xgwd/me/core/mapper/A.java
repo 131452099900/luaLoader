@@ -7,5 +7,5 @@ import lua.xgwd.me.core.annotation.LuaScript;
 public interface A {
 
     @LuaScript("test.lua")
-    Long test();
+    Long test(String[] keys, String[] args);
 }

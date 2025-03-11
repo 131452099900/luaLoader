@@ -5,6 +5,7 @@ import lua.xgwd.me.core.annotation.LuaScript;
 import lua.xgwd.me.core.bean.LuaScriptEntity;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 
@@ -12,6 +13,7 @@ import java.io.*;
  * @author gbl.huang
  * @date 2025/03/10 17:44
  **/
+@Component
 public class DefaultLuaScriptLoader implements LuaScriptLoader {
 
     @Override

@@ -13,5 +13,5 @@ import java.util.Objects;
 @AllArgsConstructor
 public class LuaScriptParams {
     private String[] keys;
-    private Objects[] args;
+    private String[] args;
 }

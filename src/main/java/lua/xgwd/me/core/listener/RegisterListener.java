@@ -20,7 +20,6 @@ public class RegisterListener implements ApplicationListener<RegisterEvent> {
 
     @Override
     public void onApplicationEvent(RegisterEvent registerEvent) {
-        System.out.println("监听到消息--------" + registerEvent);
-        luaScriptRegistry.register(new LuaScriptEntity(registerEvent.getId()));
+        luaScriptRegistry.register(registerEvent.getLuaScriptEntity());
     }
 }

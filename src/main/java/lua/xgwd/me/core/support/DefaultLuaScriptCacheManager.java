@@ -4,6 +4,8 @@ import lombok.Data;
 import lua.xgwd.me.core.LuaScriptCacheManager;
 import lua.xgwd.me.core.LuaScriptStorage;
 import lua.xgwd.me.core.bean.LuaScriptEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,40 +16,42 @@ import java.util.concurrent.locks.ReentrantLock;
  * 默认使用Lua进行实现
  **/
 @Data
+@Component
 public class DefaultLuaScriptCacheManager implements LuaScriptCacheManager {
 
-    private LuaScriptStorage storage;
+//    @Autowired
+    private LuaScriptStorage luaScriptStorage;
 
+    @Autowired
+    public void setLuaScriptStorage(LuaScriptStorage luaScriptStorage) {
+       this.luaScriptStorage = luaScriptStorage;
+        lruCache.storage = luaScriptStorage;
+    }
     private final int capacity;
 
     LRUCache lruCache;
 
-
-    public static void main(String[] args) {
-        DefaultLuaScriptCacheManager cacheManager =
-                new DefaultLuaScriptCacheManager(new DefaultLuaScriptStorage(), 2);
-        cacheManager.addScript(new LuaScriptEntity("1", "value1"));
-        cacheManager.addScript(new LuaScriptEntity("2", "value2"));
-        cacheManager.addScript(new LuaScriptEntity("3", "value3"));
-        System.out.println(cacheManager.getById("1"));
+    public DefaultLuaScriptCacheManager() {
+        capacity = 256;
+        lruCache = new LRUCache(capacity, luaScriptStorage);
     }
 
     public DefaultLuaScriptCacheManager(LuaScriptStorage storage, int capacity) {
         this.capacity = capacity;
-        this.storage = storage;
+        this.luaScriptStorage = storage;
         lruCache = new LRUCache(capacity, storage);
     }
 
 
     @Override
     public void addScript(LuaScriptEntity luaScriptEntity) {
-        storage.insert(luaScriptEntity);
+        luaScriptStorage.insert(luaScriptEntity);
         lruCache.put(luaScriptEntity.getId());
     }
 
     @Override
     public void removeScript(String id) {
-        storage.removeById(id);
+        luaScriptStorage.removeById(id);
         lruCache.remove(id);
     }
 
@@ -57,13 +61,13 @@ public class DefaultLuaScriptCacheManager implements LuaScriptCacheManager {
         if (key == null) {
             return null;
         }
-        return storage.findById(id);
+        return luaScriptStorage.findById(id);
     }
 
 
     @Override
     public List<LuaScriptEntity> getAll() {
-        return new ArrayList<>(storage.getAll());
+        return new ArrayList<>(luaScriptStorage.getAll());
     }
 }
 
@@ -106,6 +110,7 @@ class LRUCache {
             if (map.containsKey(key)) {
                 removeNode(key);
             }
+            storage.removeById(key);
         } finally {
             lock.unlock();
         }
@@ -132,7 +137,6 @@ class LRUCache {
         node.prev = node.next = null;
 
         map.remove(node.key);
-        storage.removeById(key);
     }
 
     // Add the Node at the head of DLL

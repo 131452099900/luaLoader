@@ -1,17 +1,25 @@
 package lua.xgwd.me.core.support;
 
-import lua.xgwd.me.core.BootStrapLuaScriptLoader;
-import lua.xgwd.me.core.ClassScanner;
+import lua.xgwd.me.core.*;
 import lua.xgwd.me.core.annotation.LuaMapper;
 import lua.xgwd.me.core.annotation.LuaScript;
+import lua.xgwd.me.core.bean.LuaScriptEntity;
 import lua.xgwd.me.core.event.RegisterEvent;
 import lua.xgwd.me.core.proxy.LuaMapperInvocationHandler;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -31,14 +39,21 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
 
     ClassScanner classScanner;
 
+    @Autowired
+    LuaScriptLoader luaScriptLoader;
+
     @Override
     public void bootstrapScanLuaScript(String packageName) {
 
     }
 
     private String basePackage;
-    // 保存扫描到的代理对象，键为接口的 Class
-    private Map<Class<?>, Object> mapperProxies = new HashMap<>();
+
+    @Autowired
+    private LuaMapperFactory factory;
+
+    @Autowired
+    private LuaScriptExecutor executor;
 
     public DefaultBootstrapLoader(ClassScanner classScanner) {
         this.classScanner = classScanner;
@@ -60,8 +75,9 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
                 if (method.isAnnotationPresent(LuaScript.class)) {
                     LuaScript annotation = method.getAnnotation(LuaScript.class);
                     String scriptId = annotation.value();
-                    System.out.println(scriptId);
-                    applicationContext.publishEvent(new RegisterEvent(scriptId));
+
+                    LuaScriptEntity luaScriptEntity = luaScriptLoader.loadScript(scriptId);
+                    applicationContext.publishEvent(new RegisterEvent(scriptId, luaScriptEntity));
                     methodScriptMapping.put(method, scriptId);
                 }
             }
@@ -70,23 +86,16 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
             // 生成代理对象
             Object proxyInstance = Proxy.newProxyInstance(
                     mapperInterface.getClassLoader(),
-                    new Class<?>[]{mapperInterface},
-                    new LuaMapperInvocationHandler(methodScriptMapping)
+                    new Class<?>[]{mapperInterface}, // 父类接口
+                    new LuaMapperInvocationHandler(methodScriptMapping, executor)
             );
-            // 保存代理对象，后续业务中可通过 getMapper 获取
-            mapperProxies.put(mapperInterface, proxyInstance);
-        }
-    }
 
-    //    /**
-//     * 获取某个LuaMapper接口的代理实例
-//     *
-//     * @param mapperInterface 接口类型
-//     * @param <T>             泛型类型
-//     * @return 代理对象实例
-//     */
-    public <T> T getMapper(Class<T> mapperInterface) {
-        return (T) mapperProxies.get(mapperInterface);
+            // 保存代理对象，后续业务中可通过 getMapper 获取
+            factory.put(mapperInterface, proxyInstance);
+
+            // 注入容器
+            injectContext(proxyInstance);
+        }
     }
 
     @Override
@@ -102,5 +111,17 @@ public class DefaultBootstrapLoader implements BootStrapLuaScriptLoader,
         basePackage = name;
         System.out.println(basePackage);
         load();
+    }
+
+    private void injectContext(Object obj) {
+        Class<?> aClass = obj.getClass();
+        DefaultListableBeanFactory beanFactory =(DefaultListableBeanFactory ) applicationContext.getAutowireCapableBeanFactory();
+        // 获取 BeanFactory
+        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
+        System.out.println(obj.getClass().getName() + " hahahah   ");
+        System.out.println(obj.getClass().getGenericInterfaces()[0].getTypeName());
+        // 代理的父类是接口
+        beanFactory.registerSingleton(obj.getClass().getName(), obj);
+
     }
 }
