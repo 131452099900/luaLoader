@@ -30,6 +30,29 @@
         </dependency>
 ```
 
+resources/lua目录
+```
+local key1 = KEYS[1]
+local key2 = KEYS[2]
+local value1 = ARGV[1]
+local value2 = ARGV[2]
+
+-- 在 Redis 中设置键值对
+redis.call('SET', key1, value1)
+redis.call('SET', key2, value2)
+
+-- 无返回
+return 0
+```
+
+```
+@LuaMapper
+public interface LuaMapper1 {
+    @LuaScript("test.lua")
+    Long luaScpt(String[] keys, String[] args);
+}
+```
+
 ``` 
 public static void main(String[] args) {
     ConfigurableApplicationContext run = SpringApplication.run(Sp.class, args);
@@ -43,3 +66,4 @@ public static void main(String[] args) {
     Long aLong = mapper.luaScpt(new String[]{"k1", "k2"}, new String[]{"v1", "v2"});
 }
 ```
+
